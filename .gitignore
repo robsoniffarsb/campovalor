@@ -1,0 +1,50 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / VSCode
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+.pub-cache/
+/build/
+/coverage/
+
+# Firebase / configs locais
+android/local.properties
+
+# Android
+android/.gradle/
+android/app/debug
+android/app/profile
+android/app/release
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/.last_build_id
+
+# Web
+lib/generated_plugin_registrant.dart
+
+# Outros
+*.lock
