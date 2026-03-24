@@ -213,8 +213,8 @@ class EstoqueItem extends StatelessWidget {
         children: [
           Image.asset(
             imagem,
-            width: 50,
-            height: 50,
+            width: 53,
+            height: 53,
           ),
 
           const SizedBox(width: 10),
@@ -223,7 +223,7 @@ class EstoqueItem extends StatelessWidget {
           Expanded(
             child: Text(
               nome,
-              style: const TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 23),
             ),
           ),
 
