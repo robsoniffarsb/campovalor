@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">694203736616</string>
+    <string name="google_api_key" translatable="false">AIzaSyCNBTG5KTOm7TNbzd2eeko1VFZzNDeVIXA</string>
+    <string name="google_app_id" translatable="false">1:694203736616:android:139097763b57b5e541cb1d</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCNBTG5KTOm7TNbzd2eeko1VFZzNDeVIXA</string>
+    <string name="google_storage_bucket" translatable="false">campo-valor.firebasestorage.app</string>
+    <string name="project_id" translatable="false">campo-valor</string>
+</resources>
