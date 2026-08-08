@@ -17,13 +17,13 @@ class _CadastroState extends State<Cadastro> {
 
   Future<void> criarUsuario() async {
     try {
-      // 🔥 Cria usuário no Firebase Auth
+      // Cria usuário no Firebase Auth
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: senhaController.text.trim(),
       );
 
-      // 🔥 Salva dados extras no Firestore
+      //  Salva dados extras no Firestore
       await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -33,7 +33,7 @@ class _CadastroState extends State<Cadastro> {
         'criadoEm': Timestamp.now(),
       });
 
-      // 🔥 Vai direto para Home e remove todas as telas anteriores
+      //  Vai direto para Home e remove todas as telas anteriores
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const HomePage()),
         (route) => false,

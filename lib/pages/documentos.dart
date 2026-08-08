@@ -70,7 +70,7 @@ class DocumentosPage extends StatelessWidget {
     );
   }
 
-  // 🔥 DIALOG + UPLOAD
+  // DIALOG + UPLOAD
   void _mostrarDialogo(BuildContext context) {
     final nomeController = TextEditingController();
     final user = FirebaseAuth.instance.currentUser;
@@ -156,7 +156,7 @@ class DocumentosPage extends StatelessWidget {
   }
 }
 
-// 🔥 ITEM
+//  ITEM
 class DocumentoItem extends StatelessWidget {
   final String nome;
   final String url;
@@ -192,7 +192,7 @@ class DocumentoItem extends StatelessWidget {
         ),
         title: Text(nome),
 
-        // 🔥 ABRIR DOCUMENTO
+        // ABRIR DOCUMENTO
         onTap: () async {
           final uri = Uri.parse(url);
           if (await canLaunchUrl(uri)) {
@@ -200,7 +200,7 @@ class DocumentoItem extends StatelessWidget {
           }
         },
 
-        // 🔥 DELETAR
+        // DELETAR
         trailing: IconButton(
           icon: const Icon(Icons.delete, color: Colors.red),
           onPressed: () async {
