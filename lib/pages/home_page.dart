@@ -1,3 +1,4 @@
+import 'package:appcampo/pages/financeiro.dart';
 import 'package:flutter/material.dart';
 import 'package:appcampo/pages/cards.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -61,7 +62,14 @@ class _HomePageState extends State<HomePage> {
                   HomeCard(
                     icon: Icons.attach_money,
                     title: 'Financeiro',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FinanceiroPage(),
+                        ),
+                      );
+                    },
                   ),
                   HomeCard(
                     icon: Icons.inventory_2,
