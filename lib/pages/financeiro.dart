@@ -1,7 +1,10 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'despesas.dart';
 
 class FinanceiroPage extends StatefulWidget {
   const FinanceiroPage({super.key});
@@ -13,9 +16,9 @@ class FinanceiroPage extends StatefulWidget {
 class _FinanceiroPageState extends State<FinanceiroPage> {
   DateTime mesSelecionado = DateTime.now();
 
-  // ============================================================
+  // =========================
   // NOME DO MÊS
-  // ============================================================
+  // =========================
 
   String nomeDoMes() {
     const meses = [
@@ -36,9 +39,9 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
     return meses[mesSelecionado.month - 1];
   }
 
-  // ============================================================
+  // =========================
   // ESCOLHER O MÊS
-  // ============================================================
+  // =========================
 
   Future<void> selecionarMes() async {
     final novaData = await showDatePicker(
@@ -55,9 +58,9 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
     }
   }
 
-  // ============================================================
-  // VERIFICA SE A VENDA É DO MÊS SELECIONADO
-  // ============================================================
+  // =========================
+  // VERIFICA O MÊS DA VENDA
+  // =========================
 
   bool vendaDoMes(Map<String, dynamic> data) {
     if (data['data'] == null) {
@@ -70,9 +73,9 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
         dataVenda.month == mesSelecionado.month;
   }
 
-  // ============================================================
-  // CALCULA O TOTAL
-  // ============================================================
+  // =========================
+  // CALCULA TOTAL
+  // =========================
 
   double calcularTotal(List<QueryDocumentSnapshot> vendas) {
     double total = 0;
@@ -90,9 +93,9 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
     return total;
   }
 
-  // ============================================================
+  // =========================
   // TELA
-  // ============================================================
+  // =========================
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +135,10 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
 
             final documentos = snapshot.data?.docs ?? [];
 
-            // Pega somente as vendas do mês selecionado
+            // =========================
+            // FILTRA AS VENDAS DO MÊS
+            // =========================
+
             final vendasDoMes = documentos.where((documento) {
               final data = documento.data() as Map<String, dynamic>;
 
@@ -141,98 +147,112 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
 
             final total = calcularTotal(vendasDoMes);
 
-            return Column(
-              children: [
-                // ==================================================
-                // PARTE SUPERIOR
-                // ==================================================
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // =========================
+                  // PARTE SUPERIOR
+                  // =========================
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // VOLTAR
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.black,
+                          ),
+                        ),
+
+                        // MÊS + TOTAL
+                        Column(
+                          children: [
+                            Text(
+                              nomeDoMes(),
+                              style: const TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                            Text(
+                              'R\$ ${total.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // EDITAR MÊS
+                        IconButton(
+                          onPressed: selecionarMes,
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // BOTÃO VOLTAR
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.black,
+
+                  const SizedBox(height: 15),
+
+                  // =========================
+                  // NOVA VENDA
+                  // =========================
+
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      mostrarNovaVenda(context);
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text(
+                      'Nova venda',
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // =========================
+                  // GRÁFICO DE VENDAS
+                  // =========================
+
+                  if (vendasDoMes.isEmpty)
+                    const SizedBox(
+                      height: 250,
+                      child: Center(
+                        child: Text(
+                          'Nenhuma venda neste mês.',
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
                         ),
                       ),
+                    )
+                  else
+                    GraficoVendas(
+                      vendas: vendasDoMes,
+                    ),
 
-                      // MÊS E TOTAL
-                      Column(
-                        children: [
-                          Text(
-                            nomeDoMes(),
-                            style: const TextStyle(
-                              fontSize: 18,
-                            ),
-                          ),
-                          Text(
-                            'R\$ ${total.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
+                  const SizedBox(height: 30),
 
-                      // BOTÃO EDITAR
-                      IconButton(
-                        onPressed: selecionarMes,
-                        icon: const Icon(
-                          Icons.edit_outlined,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                  // =========================
+                  // DESPESAS
+                  // =========================
 
-                const SizedBox(height: 20),
+                  const DespesasWidget(),
 
-                // ==================================================
-                // BOTÃO NOVA VENDA
-                // ==================================================
-
-                ElevatedButton.icon(
-                  onPressed: () {
-                    mostrarNovaVenda(context);
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text(
-                    'Nova venda',
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // ==================================================
-                // GRÁFICO
-                // ==================================================
-
-                Expanded(
-                  child: vendasDoMes.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'Nenhuma venda neste mês.',
-                            style: TextStyle(
-                              fontSize: 18,
-                            ),
-                          ),
-                        )
-                      : GraficoVendas(
-                          vendas: vendasDoMes,
-                        ),
-                ),
-              ],
+                  const SizedBox(height: 30),
+                ],
+              ),
             );
           },
         ),
@@ -240,9 +260,9 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
     );
   }
 
-  // ============================================================
-  // CADASTRAR NOVA VENDA
-  // ============================================================
+  // =====================================================
+  // NOVA VENDA
+  // =====================================================
 
   void mostrarNovaVenda(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -291,9 +311,9 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // =================================================
+                      // =========================
                       // PRODUTO
-                      // =================================================
+                      // =========================
 
                       DropdownButtonFormField<String>(
                         value: produtoSelecionado,
@@ -322,9 +342,9 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
 
                       const SizedBox(height: 15),
 
-                      // =================================================
+                      // =========================
                       // VALOR
-                      // =================================================
+                      // =========================
 
                       TextField(
                         controller: valorController,
@@ -368,8 +388,10 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
                       return;
                     }
 
-                    final valorTexto =
-                        valorController.text.replaceAll(',', '.');
+                    final valorTexto = valorController.text.replaceAll(
+                      ',',
+                      '.',
+                    );
 
                     final valor = double.tryParse(valorTexto);
 
@@ -386,9 +408,9 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
                     }
 
                     try {
-                      // ================================================
-                      // SALVA A VENDA NO FIREBASE
-                      // ================================================
+                      // =========================
+                      // SALVA NO FIREBASE
+                      // =========================
 
                       await FirebaseFirestore.instance
                           .collection('usuarios')
@@ -428,9 +450,9 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
   }
 }
 
-// ================================================================
-// GRÁFICO
-// ================================================================
+// =====================================================
+// GRÁFICO DE VENDAS
+// =====================================================
 
 class GraficoVendas extends StatelessWidget {
   final List<QueryDocumentSnapshot> vendas;
@@ -444,10 +466,12 @@ class GraficoVendas extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<String, double> valoresPorProduto = {};
 
+    // SOMA AS VENDAS DE CADA PRODUTO
     for (var venda in vendas) {
       final data = venda.data() as Map<String, dynamic>;
 
       final produto = data['produto']?.toString() ?? 'Outro';
+
       final valor = data['valor'];
 
       if (valor is num) {
@@ -457,21 +481,33 @@ class GraficoVendas extends StatelessWidget {
     }
 
     if (valoresPorProduto.isEmpty) {
-      return const Center(
-        child: Text(
-          'Nenhuma venda neste mês.',
-          style: TextStyle(fontSize: 18),
+      return const SizedBox(
+        height: 250,
+        child: Center(
+          child: Text(
+            'Nenhuma venda neste mês.',
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
         ),
       );
     }
 
+    final total = valoresPorProduto.values.fold(
+      0.0,
+      (a, b) => a + b,
+    );
+
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // =========================
         // GRÁFICO
+        // =========================
+
         SizedBox(
-          width: 360,
-          height: 360,
+          width: double.infinity,
+          height: 330,
           child: CustomPaint(
             painter: GraficoPizzaPainter(
               valores: valoresPorProduto,
@@ -486,7 +522,7 @@ class GraficoVendas extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'R\$ ${valoresPorProduto.values.fold(0.0, (a, b) => a + b).toStringAsFixed(0)}',
+                    'R\$ ${total.toStringAsFixed(0)}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 15,
@@ -501,65 +537,73 @@ class GraficoVendas extends StatelessWidget {
 
         const SizedBox(height: 5),
 
-        // LEGENDA DOS PRODUTOS
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 12,
-          runSpacing: 8,
-          children: valoresPorProduto.keys.map((produto) {
-            final index = valoresPorProduto.keys.toList().indexOf(produto);
+        // =========================
+        // LEGENDA
+        // =========================
 
-            final cores = [
-              const Color(0xFF2ECC71),
-              const Color(0xFF8E6CEF),
-              const Color(0xFF292D3E),
-              const Color(0xFFE67E22),
-              const Color(0xFFE74C3C),
-              const Color(0xFF3498DB),
-              const Color(0xFFF1C40F),
-              const Color(0xFF1ABC9C),
-            ];
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 15,
+          ),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
+            children: valoresPorProduto.keys.map((produto) {
+              final index = valoresPorProduto.keys.toList().indexOf(produto);
 
-            return Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 5,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: cores[index % cores.length],
-                      shape: BoxShape.circle,
+              final cores = [
+                const Color(0xFF2ECC71),
+                const Color(0xFF8E6CEF),
+                const Color(0xFF292D3E),
+                const Color(0xFFE67E22),
+                const Color(0xFFE74C3C),
+                const Color(0xFF3498DB),
+                const Color(0xFFF1C40F),
+                const Color(0xFF1ABC9C),
+              ];
+
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: cores[index % cores.length],
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    produto,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    const SizedBox(width: 5),
+                    Text(
+                      produto,
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
   }
 }
 
-// ================================================================
+// =====================================================
 // PAINTER DO GRÁFICO
-// ================================================================
+// =====================================================
 
 class GraficoPizzaPainter extends CustomPainter {
   final Map<String, double> valores;
@@ -569,7 +613,10 @@ class GraficoPizzaPainter extends CustomPainter {
   });
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(
+    Canvas canvas,
+    Size size,
+  ) {
     final total = valores.values.fold(
       0.0,
       (soma, valor) => soma + valor,
@@ -584,7 +631,14 @@ class GraficoPizzaPainter extends CustomPainter {
       size.height / 2,
     );
 
-    final raio = 140.0;
+    // =========================
+    // TAMANHO DO GRÁFICO
+    // =========================
+
+    final raio = min(
+      140.0,
+      min(size.width / 2 - 10, size.height / 2 - 10),
+    );
 
     final cores = [
       const Color(0xFF2ECC71),
@@ -597,22 +651,22 @@ class GraficoPizzaPainter extends CustomPainter {
       const Color(0xFF1ABC9C),
     ];
 
-    double inicio = -1.5708;
+    double inicio = -pi / 2;
 
     int index = 0;
 
+    // =========================
+    // FATIAS
+    // =========================
+
     for (final entrada in valores.entries) {
-      final produto = entrada.key;
       final valor = entrada.value;
 
       final porcentagem = valor / total;
-      final angulo = porcentagem * 2 * 3.14159265359;
+
+      final angulo = porcentagem * 2 * pi;
 
       final cor = cores[index % cores.length];
-
-      // ==========================================
-      // FATIA
-      // ==========================================
 
       final paint = Paint()
         ..color = cor
@@ -629,9 +683,9 @@ class GraficoPizzaPainter extends CustomPainter {
         paint,
       );
 
-      // ==========================================
-      // VALOR DA FATIA
-      // ==========================================
+      // =========================
+      // TEXTO DA FATIA
+      // =========================
 
       final meioAngulo = inicio + angulo / 2;
 
@@ -647,7 +701,7 @@ class GraficoPizzaPainter extends CustomPainter {
           text: textoValor,
           style: const TextStyle(
             color: Colors.black,
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -680,18 +734,14 @@ class GraficoPizzaPainter extends CustomPainter {
         ),
       );
 
-      // ==========================================
-      // PRÓXIMA FATIA
-      // ==========================================
-
       inicio += angulo;
 
       index++;
     }
 
-    // ==========================================
+    // =========================
     // FURO CENTRAL
-    // ==========================================
+    // =========================
 
     final centroPaint = Paint()
       ..color = Colors.white
@@ -699,7 +749,7 @@ class GraficoPizzaPainter extends CustomPainter {
 
     canvas.drawCircle(
       centro,
-      38,
+      45,
       centroPaint,
     );
   }
